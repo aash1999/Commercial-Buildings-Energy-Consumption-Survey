@@ -1,0 +1,12 @@
+{
+  "projectName": "Capital-Bike",
+  "projectOwner": "aash1999",
+  "files": [
+    "README.md"
+  ],
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributorsPerLine": 7,
+  "contributors": [
+  ]
+}
