@@ -50,6 +50,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/aash1999"><img src="https://avatars.githubusercontent.com/u/39939476?v=4?s=100" width="100px;" alt="Aakash Singh"/><br /><sub><b>Aakash Singh</b></sub></a><br /><a href="#code-aash1999" title="Code">💻</a> <a href="#doc-aash1999" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jhson97"><img src="https://avatars.githubusercontent.com/u/179087896?v=4?s=100" width="100px;" alt="jhson97"/><br /><sub><b>jhson97</b></sub></a><br /><a href="#code-jhson97" title="Code">💻</a> <a href="#doc-jhson97" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Sagargwu"><img src="https://avatars.githubusercontent.com/u/179178162?v=4?s=100" width="100px;" alt="Sagar Shah"/><br /><sub><b>Sagar Shah</b></sub></a><br /><a href="#code-Sagargwu" title="Code">💻</a> <a href="#doc-Sagargwu" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jmontoya2108"><img src="https://avatars.githubusercontent.com/u/179538905?v=4?s=100" width="100px;" alt="jmontoya2108"/><br /><sub><b>jmontoya2108</b></sub></a><br /><a href="#code-jmontoya2108" title="Code">💻</a> <a href="#doc-jmontoya2108" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
