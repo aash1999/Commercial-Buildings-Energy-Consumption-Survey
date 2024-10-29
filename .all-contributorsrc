@@ -2,7 +2,7 @@
   "projectName": "Capital-Bike",
   "projectOwner": "aash1999",
   "files": [
-    "README.md"
+    "readme.md"
   ],
   "commitType": "docs",
   "commitConvention": "angular",
