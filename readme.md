@@ -1,10 +1,14 @@
-# Bike Rental Patterns Analysis 🚲
+# 2018 CBECS Survey Data
 
 ## Research Question 
-How do weather conditions and rental patterns (pickups and dropoffs) interact across different stations over the course of a year, and can we predict daily bike rental demand based on these factors?
-
-## Project Overview
-This project analyzes the relationship between weather conditions and bike rental patterns using Capital Bikes dataset. The analysis includes developing predictive models to forecast daily bike rental demand based on weather variables.
+This research explores commercial building energy consumption across the 50 states and the
+District of Columbia. Each row represents a single response from various types of buildings in
+the United States. In this dataset, there are approximately 6,436 observations. By analyzing
+this dataset, we aim to identify patterns related to electricity consumption in the United States
+in 2018. Our dependent variable for analysis will be annual electricity expenditures (ELEXP).
+Through this analysis, we hope to determine which specific factors have the greatest impact
+on electricity bills. With this information, we can assess which types of buildings are the most
+efficient in terms of electricity consumption.
 
 ## Project Structure
 ```
@@ -18,8 +22,8 @@ bike-rental-analysis/
 ```
 
 ## Data Sources
-- Dataset: Capital Bikes Demand Prediction
-- Source: [Kaggle Dataset](https://www.kaggle.com/code/arshmankhalid/capital-bikes-demand-predict-optimize)
+- Dataset: Commercial Buildings Energy Consumption Survey
+- Source: [eia](https://www.eia.gov/consumption/commercial/data/2018/index.php?view=microdata)
 - Files should be placed in the `datasets` folder
 
 ## Results
