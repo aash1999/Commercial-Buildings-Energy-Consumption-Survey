@@ -12,7 +12,7 @@ efficient in terms of electricity consumption.
 
 ## Project Structure
 ```
-bike-rental-analysis/
+CBECS-Survey-Data-analysis/
 ├── datasets/           # Contains all CSV/xlsx data files. Ignore these files in .gitignore except 2018microdata_codebook.xlsx
 ├── utility/            # Helper functions and utility scripts
 ├── codes/             # Main analysis scripts and notebooks
