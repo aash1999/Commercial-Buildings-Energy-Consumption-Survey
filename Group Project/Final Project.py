@@ -168,3 +168,217 @@ sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
 plt.title('Correlation Matrix')
 plt.show()
 # %%
+#Smart Q2
+# Exploring some EDAs
+# Creating a bubble chart Electricity consumption, SQFT, Number_workers and boiler
+# Plot the bubble chart
+sns.scatterplot(
+    data=df_cleaned, 
+    x='Number_Workers', 
+    y='SQFT', 
+    size= ('Electricity_Consumption'),
+    sizes=(50, 1000), 
+    palette='viridis', 
+    hue='Boiler', 
+    legend=True
+)
+
+plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+# Show the plot
+plt.show()
+
+# %%
+# Creating a bubble chart Electricity consumption, SQFT, Number_workers and boiler
+# Plot the bubble chart
+sns.scatterplot(
+    data=df_cleaned, 
+    x='Number_Workers', 
+    y='Work_hours', 
+    size= ('Electricity_Consumption'),
+    sizes=(50, 1000), 
+    palette='Spectral', 
+    hue='Boiler', 
+    legend=True
+)
+
+
+plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+# Show the plot
+plt.show()
+# %%
+# %%
+# Creating a bubble chart Electricity consumption, SQFT, Number_workers and boiler
+# Plot the bubble chart
+df_cleaned['Building_Activity'] = df_cleaned['Building_Activity'].astype('category')
+#Create a mapping for Building_Activity
+building_activity_map = {
+    1: 'Vacant',
+    2: 'Office',
+    4: 'Laboratory',
+    5: 'Nonrefrigerated warehouse',
+    6: 'Food sales',
+    7: 'Public order and safety',
+    8: 'Outpatient health care',
+    11: 'Refrigerated warehouse',
+    12: 'Religious worship',
+    13: 'Public assembly',
+    14: 'Education',
+    15: 'Food service',
+    16: 'Inpatient health care',
+    17: 'Nursing',
+    18: 'Lodging',
+    23: 'Strip shopping center',
+    24: 'Enclosed mall',
+    25: 'Retail other than mall',
+    26: 'Service',
+    91: 'Other'
+}
+
+df_cleaned['Building_Activity'] = df_cleaned['Building_Activity'].replace(building_activity_map)
+
+
+sns.scatterplot(
+    data=df_cleaned, 
+    x='Number_Workers', 
+    y='Electricity_Consumption', 
+    size= ('SQFT'),
+    sizes=(50, 1000), 
+    palette='Set2', 
+    hue='Building_Activity', 
+    legend=True
+)
+
+
+plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+# Show the plot
+plt.show()
+
+
+# %%
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+
+# Function to format y-axis in millions
+def millions(x, pos):
+    return f'{x / 1_000_000:.1f}M'
+
+# Create a pivot table (this part remains the same)
+df_pivot = df_cleaned.pivot_table(index='Boiler', columns='Building_Activity', values='Electricity_Consumption', aggfunc='sum', fill_value=0)
+
+# Calculate the sum of each 'Building_Activity' column and sort them in descending order
+sorted_columns = df_pivot.sum(axis=0).sort_values(ascending=False).index
+
+# Reorder the pivot table columns based on the sorted values
+df_pivot = df_pivot[sorted_columns]
+print(df_pivot)
+# Plot the stacked bar plot with the sorted columns
+df_pivot.plot(kind='bar', stacked=True, figsize=(12, 12))
+
+# Apply the formatter for y-axis to display in millions
+plt.gca().yaxis.set_major_formatter(FuncFormatter(millions))
+
+# Set the title and labels
+plt.title('Stacked Bar Plot of Annual Electricity Consumption according to Boiler and Building Activity')
+plt.xlabel('Boiler')
+plt.ylabel('Electricity Consumption (in Millions kW)')
+
+# Annotate each segment with its value
+for i in range(len(df_pivot)):
+    cumulative_height = 0  
+    for j in range(len(df_pivot.columns)):
+        height = df_pivot.iloc[i, j]
+        if height > 0: 
+            # Calculate the position for the label
+            plt.text(i, cumulative_height + height / 2, 
+                     f'{height / 1_000_000:.1f}', 
+                     ha='center', va='center', color='black')
+            cumulative_height += height 
+
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', title='Building Activity')
+
+plt.tight_layout() 
+
+# Show the plot
+plt.show()
+
+
+# %%
+#Doing a Linear model
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import StandardScaler
+
+# 2. Encode categorical variables if necessary (e.g., using one-hot encoding)
+df_cleaned = pd.get_dummies(df_cleaned, drop_first=True)
+#%%
+# 3. Feature scaling (optional, depending on your data)
+scaler = StandardScaler()
+numerical_columns = df_cleaned.select_dtypes(include=['float64', 'int64']).columns
+df_cleaned[numerical_columns] = scaler.fit_transform(df_cleaned[numerical_columns])
+
+print(df_cleaned)
+# %%
+# Define the features (independent variables) and target (dependent variable)
+X = df_cleaned.drop('Electricity_Consumption', axis=1)  # Replace 'target_column' with the name of your target variable
+y = df_cleaned['Electricity_Consumption']
+
+# Split the data into 80% training and 20% testing
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+
+#%%
+# Initialize the linear regression model
+model = LinearRegression()
+
+# Fit the model on the training data
+model.fit(X_train, y_train)
+
+intercept = model.intercept_
+coefficients = model.coef_
+feature_names = X.columns
+
+#Getting equation
+equation = f"y = {intercept:.2f}"
+for feature, coef in zip(feature_names, coefficients):
+    equation += f" + ({coef:.2f} * {feature})"
+
+print(equation)
+#%%
+# Predict the target values for the test set
+y_pred = model.predict(X_test)
+# Calculate R2 and Mean Squared Error
+r2 = r2_score(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+
+print(f"R² Score: {r2}")
+print(f"Mean Squared Error: {mse}")
+# %%
+print(df_cleaned)
+
+# %%
+#Test the model
+input_data = {
+    'SQFT': 28000, 
+    'Number_Workers': 12,
+    'Building_Activity': 2,
+    'Work_hours':45,
+    'Cooling_Days': 189,
+    'Number_desktops':20,
+    'Wall_Construction_Material':1,
+    'Boiler':2,
+    'Own_Type':2,
+    'Climate_Zone':4,
+    }
+#%%
+# Convert the input data into the same format used for training the model
+# For simplicity, let's assume that you trained the model using a DataFrame.
+input_df = pd.DataFrame([input_data])
+
+# Predict using the trained model
+predicted_value = model.predict(input_df)
+
+print(predicted_value)
+# %%
