@@ -106,5 +106,67 @@ model.fit(X, y)
 feature_importance = pd.DataFrame({'Feature': X.columns, 'Importance': model.feature_importances_})
 print(feature_importance.sort_values(by='Importance', ascending=False))
 # %%
-feature_importance.sort_values(by='Importance', ascending=False).head(10)
+feature_importance.sort_values(by='Importance', ascending=False).head(6)
+
+
+
+
+
+
+
+
+
+
+
+#%%
+X = df_cleaned[['SQFT', 'NWKER', 'WKHRS', 'CDD65', 'PCTERMN', 'PBA']]
+y = df['ELCNS']
+
+
+#%%
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test = train_test_split(X, y,test_size = 0.2,random_state = 42)
+print(df.shape)
+print(X_train.shape)
+print(X_test.shape)
+print(y_train.shape)
+print(y_test.shape)
+
+#%%
+from sklearn.linear_model import LinearRegression
+lm = LinearRegression()
+lm.fit(X_train,y_train)
+lm.score(X_train,y_train)
+
+
+#%%
+y_pred = lm.predict(X_test)
+
+#%%
+from sklearn.metrics import r2_score,mean_squared_error,mean_absolute_error
+print("R2 Score")
+r2_score(y_pred,y_test)
+
+#%%
+import matplotlib.pyplot as plt
+import seaborn as sns
+residual = y_test - y_pred
+sns.histplot(residual)
+
+#%%
+plt.scatter(y_test,y_test)
+plt.xlabel("Real Values")
+plt.ylabel("predicted values")
+
+# %%
+#Attempted Linear Model
+from statsmodels.formula.api import ols
+model = ols(formula='ELCNS ~ SQFT + NWKER + WKHRS + CDD65 + PCTERMN + C(PBA)', data=df_cleaned)
+print( type(model) )
+
+#%%
+modelfit = model.fit()
+print( type(modelfit) )
+print( modelfit.summary() )
+
 # %%
