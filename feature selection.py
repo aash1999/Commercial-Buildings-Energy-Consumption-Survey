@@ -169,4 +169,6 @@ modelfit = model.fit()
 print( type(modelfit) )
 print( modelfit.summary() )
 
-# %%
+# %%[markdown]
+#How do variations in building characteristics, such as Wall_Construction_Material and Building_Activity, 
+# interact with operational factors like Cooling_Days and Work_hours to determine electricity consumption patterns across different building types?
