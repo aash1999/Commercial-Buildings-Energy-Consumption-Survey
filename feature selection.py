@@ -106,21 +106,13 @@ model.fit(X, y)
 feature_importance = pd.DataFrame({'Feature': X.columns, 'Importance': model.feature_importances_})
 print(feature_importance.sort_values(by='Importance', ascending=False))
 # %%
-feature_importance.sort_values(by='Importance', ascending=False).head(6)
-
-
-
-
-
-
-
-
+feature_importance.sort_values(by='Importance', ascending=False).head(10)
 
 
 
 #%%
-X = df_cleaned[['SQFT', 'NWKER', 'WKHRS', 'CDD65', 'PCTERMN', 'PBA']]
-y = df['ELCNS']
+X = df_cleaned[['SQFT', 'NWKER', 'WKHRS', 'CDD65', 'PCTERMN', 'PBA', 'WLCNS', 'LTNHRP', 'OWNTYPE', 'PUBCLIM']]
+y = df_cleaned['ELCNS']
 
 
 #%%
@@ -154,14 +146,14 @@ residual = y_test - y_pred
 sns.histplot(residual)
 
 #%%
-plt.scatter(y_test,y_test)
+plt.scatter(y_test,y_pred)
 plt.xlabel("Real Values")
 plt.ylabel("predicted values")
 
 # %%
 #Attempted Linear Model
 from statsmodels.formula.api import ols
-model = ols(formula='ELCNS ~ SQFT + NWKER + WKHRS + CDD65 + PCTERMN + C(PBA)', data=df_cleaned)
+model = ols(formula='ELCNS ~ SQFT + NWKER + WKHRS + CDD65 + PCTERMN + C(PBA) + C(WLCNS)', data=df_cleaned)
 print( type(model) )
 
 #%%
@@ -169,6 +161,43 @@ modelfit = model.fit()
 print( type(modelfit) )
 print( modelfit.summary() )
 
-# %%[markdown]
-#How do variations in building characteristics, such as Wall_Construction_Material and Building_Activity, 
-# interact with operational factors like Cooling_Days and Work_hours to determine electricity consumption patterns across different building types?
+# %%
+#Chi-squared test between pubclim and wlcns
+from scipy.stats import chi2_contingency
+# %%
+data_crosstab = pd.crosstab(df_cleaned['PUBCLIM'], df_cleaned['WLCNS'])
+print(data_crosstab)
+stat, p, dof, expected = chi2_contingency(data_crosstab)
+
+# interpret p-value
+alpha = 0.05
+print("p value is " + str(p))
+if p <= alpha:
+    print('Dependent (reject H0)')
+else:
+    print('Independent (H0 holds true)')
+
+
+# %%
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Assuming your dataframe is named 'df' and has columns 'Climate_Zone' and 'Electricity_Consumption'
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='PUBCLIM', y='ELCNS', data=df_cleaned)
+plt.title('Boxplot of Electricity Consumption by Climate Zone')
+plt.xlabel('Climate Zone')
+plt.ylabel('Electricity Consumption')
+plt.xticks(rotation=45)  # Rotate x-axis labels if needed
+plt.tight_layout()
+plt.show()
+# %%
+from statsmodels.formula.api import ols
+from statsmodels.stats.anova import anova_lm
+
+# Fit the ANOVA model
+model = ols('ELCNS ~ C(PUBCLIM)', data=df).fit()
+
+# Perform ANOVA
+anova_results = anova_lm(model)
+print(anova_results)
