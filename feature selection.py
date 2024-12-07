@@ -231,6 +231,7 @@ print("\nVIF for Selected Features:")
 print(vif_data)
 
 
+
 # %%
 df_selected_scores
 # %%
@@ -260,4 +261,34 @@ plt.title("Distribution of EUI")
 plt.grid(axis='y', alpha=0.75)  # Add gridlines for better readability
 plt.tight_layout()
 plt.show()
+
+#%%
+# Create a new Data frame with the selected features and the dependent variables 'EUI'
+# List of features to keep
+features_to_keep = ['EUI','PBAPLUS', 'WKHRS', 'LTNHRP', 'NWKER','PCTERMN','COOLP','MAINHT','MAINCL','FLCEILHT','NOCC']
+
+# Filter DataFrame by selecting only rows where 'Feature' is in the list
+df_cleaned = df_cleaned[features_to_keep]
+
+#df_cleaned.insert(0, 'EUI', df_cleaned['EUI'])
+print(df_cleaned.head())
+# %%
+# Rename the features
+df_cleaned = df_cleaned.rename(columns={'EUI': 'Energy_Use_Intensity'})
+df_cleaned = df_cleaned.rename(columns={'PBAPLUS': 'Building_Activity'})
+df_cleaned = df_cleaned.rename(columns={'WKHRS': 'Work_Hours'})
+df_cleaned = df_cleaned.rename(columns={'LTNHRP': 'Percent_Lit_Off_Hours'})
+df_cleaned = df_cleaned.rename(columns={'NWKER': 'Number_Workers'})
+df_cleaned = df_cleaned.rename(columns={'PCTERMN': 'Number_Desktops'})
+df_cleaned = df_cleaned.rename(columns={'COOLP': 'Percent_Cooled'})
+df_cleaned = df_cleaned.rename(columns={'MAINHT': 'Main_Heat_Equip'})
+df_cleaned = df_cleaned.rename(columns={'MAINCL': 'Main_Cool_Equp'})
+df_cleaned = df_cleaned.rename(columns={'FLCEILHT': 'Floor_Ceiling_Height'})
+df_cleaned = df_cleaned.rename(columns={'NOCC': 'Number_business'})
+
+print(df_cleaned)
+
+#%%
+df_cleaned.to_csv('cleaned_data2.csv', index=False)
+
 # %%
