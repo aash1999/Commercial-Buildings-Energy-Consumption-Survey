@@ -252,7 +252,7 @@ df_cleaned = df_cleaned.rename(columns={'PCTERMN': 'Number_Desktops'})
 df_cleaned = df_cleaned.rename(columns={'COOLP': 'Percent_Cooled'})
 df_cleaned = df_cleaned.rename(columns={'MAINHT': 'Main_Heat_Equip'})
 df_cleaned = df_cleaned.rename(columns={'MAINCL': 'Main_Cool_Equp'})
-df_cleaned = df_cleaned.rename(columns={'FLCEILHT': ' Floor_Ceiling_Height'})
+df_cleaned = df_cleaned.rename(columns={'FLCEILHT': 'Floor_Ceiling_Height'})
 df_cleaned = df_cleaned.rename(columns={'NOCC': 'Number_business'})
 
 print(df_cleaned)
