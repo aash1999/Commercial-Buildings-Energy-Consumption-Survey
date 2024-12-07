@@ -213,3 +213,20 @@ print(df_selected_scores)
 print("\nVIF for Selected Features:")
 print(vif_data)
 
+
+#%%
+#Remove high vif
+df_cleaned = df_cleaned.drop("MONUSE", axis = 1)
+
+
+#%%
+
+df_selected_scores, vif_data = feature_selection_vif(df_cleaned, target_variable='EUI', k_best=10)
+
+# Display the selected features and their VIF values
+print("Selected Features and Scores:")
+print(df_selected_scores)
+
+print("\nVIF for Selected Features:")
+print(vif_data)
+
