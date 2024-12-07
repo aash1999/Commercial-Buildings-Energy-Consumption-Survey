@@ -230,3 +230,34 @@ print(df_selected_scores)
 print("\nVIF for Selected Features:")
 print(vif_data)
 
+
+# %%
+df_selected_scores
+# %%
+import matplotlib.pyplot as plt
+
+# Select the top 10 features
+top_features = df_selected_scores.head(10)
+
+# Plot a horizontal bar chart
+plt.figure(figsize=(8, 6))
+plt.barh(top_features['Feature'], top_features['Score'], color='darkkhaki')
+plt.xlabel("Importance Score")
+plt.ylabel("Features")
+plt.title("Top 10 Important Features")
+plt.gca().invert_yaxis()  # Invert y-axis to show highest score at the top
+plt.tight_layout()
+plt.show()
+# %%
+
+
+# Plot the histogram for EUI
+plt.figure(figsize=(8, 6))
+plt.hist(df_cleaned['EUI'], bins=30, color='darkkhaki', edgecolor='black')
+plt.xlabel("EUI (Energy Use Intensity)")
+plt.ylabel("Frequency")
+plt.title("Distribution of EUI")
+plt.grid(axis='y', alpha=0.75)  # Add gridlines for better readability
+plt.tight_layout()
+plt.show()
+# %%
