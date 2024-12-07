@@ -19,6 +19,7 @@ print(f"Number of columns with more than 20% missing values: {len(columns_missin
 
 #remove columns with over 20 percent of data missing
 df_dropped = df.drop(columns = columns_missing_values.index)
+
 # %%
 #Fill in missing values with median
 from sklearn.impute import SimpleImputer
@@ -32,172 +33,183 @@ df_cleaned.index = df_dropped.index
 #Remove other annual values
 df_cleaned = df_cleaned.drop("MFEXP", axis = 1)
 df_cleaned = df_cleaned.drop("MFBTU", axis = 1)
+df_cleaned.drop(df_cleaned.columns[df_cleaned.columns.get_loc('ELCNS'):], axis=1, inplace=True)
+
+#%%
+#Create new dependent variable EUI - ELBTU/SQFT
+df_cleaned['EUI'] = df_cleaned['ELBTU']/df_cleaned['SQFT']
+
+#%%
+#Since we added new dependent variable, remove ELBTU
 df_cleaned = df_cleaned.drop("ELBTU", axis = 1)
-df_cleaned.drop(df_cleaned.columns[df_cleaned.columns.get_loc('ELEXP'):], axis=1, inplace=True)
-
-# %%
-from sklearn.ensemble import RandomForestRegressor
-
-# Assuming df is your DataFrame and 'target_variable' is the column you want to predict
-X = df_cleaned.drop("ELCNS", axis=1)
-y = df_cleaned["ELCNS"]
-
-# Applying RandomForestRegressor
-model = RandomForestRegressor(n_estimators=100, random_state=42)
-model.fit(X, y)
-
-# Displaying feature importance
-feature_importance = pd.DataFrame({'Feature': X.columns, 'Importance': model.feature_importances_})
-print(feature_importance.sort_values(by='Importance', ascending=False))
-# %%
-feature_importance.sort_values(by='Importance', ascending=False).head(10)
 
 #%%
-#We can see some features are repetitive, such as NWKERC, WKHRSC, PBAPLUS and SQFTC
-#drop them and run again
-df_cleaned = df_cleaned.drop("NWKERC", axis = 1)
-df_cleaned = df_cleaned.drop("WKHRSC", axis = 1)
-df_cleaned = df_cleaned.drop("PBAPLUS", axis = 1)
-df_cleaned = df_cleaned.drop("SQFTC", axis = 1)
-# %%
-# Assuming df is your DataFrame and 'target_variable' is the column you want to predict
-X = df_cleaned.drop("ELCNS", axis=1)
-y = df_cleaned["ELCNS"]
+#We have column ELUSED, which indicates if buidling uses electricity. We want his as 1.
+df_cleaned = df_cleaned[df_cleaned['ELUSED'] == 1]
 
-# Applying RandomForestRegressor
-model = RandomForestRegressor(n_estimators=100, random_state=42)
-model.fit(X, y)
-
-# Displaying feature importance
-feature_importance = pd.DataFrame({'Feature': X.columns, 'Importance': model.feature_importances_})
-print(feature_importance.sort_values(by='Importance', ascending=False))
-# %%
-feature_importance.sort_values(by='Importance', ascending=False).head(10)
-# %%
-#Repetitive: Coolp, open24, and pubid
-df_cleaned = df_cleaned.drop("COOLP", axis = 1)
-df_cleaned = df_cleaned.drop("OPEN24", axis = 1)
+#%%
 df_cleaned = df_cleaned.drop("PUBID", axis = 1)
-# %%
-# Assuming df is your DataFrame and 'target_variable' is the column you want to predict
-X = df_cleaned.drop("ELCNS", axis=1)
-y = df_cleaned["ELCNS"]
 
-# Applying RandomForestRegressor
-model = RandomForestRegressor(n_estimators=100, random_state=42)
-model.fit(X, y)
+#%%
+from sklearn.feature_selection import SelectKBest, mutual_info_regression
+from statsmodels.stats.outliers_influence import variance_inflation_factor
 
-# Displaying feature importance
-feature_importance = pd.DataFrame({'Feature': X.columns, 'Importance': model.feature_importances_})
-print(feature_importance.sort_values(by='Importance', ascending=False))
-# %%
-feature_importance.sort_values(by='Importance', ascending=False).head(10)
-# %%
-df_cleaned = df_cleaned.drop("LTNHRP", axis = 1)
-# %%
-X = df_cleaned.drop("ELCNS", axis=1)
-y = df_cleaned["ELCNS"]
+def feature_selection_vif(df, target_variable, k_best=10):
+    """
+    Perform feature selection using SelectKBest and calculate VIF for selected features.
+    
+    Parameters:
+    df (pd.DataFrame): The input DataFrame with independent variables.
+    target_variable (str): The name of the target variable.
+    k_best (int): The number of top features to select (default is 10).
+    
+    Returns:
+    selected_features_df (pd.DataFrame): DataFrame with selected features and their scores.
+    vif_df (pd.DataFrame): DataFrame with selected features and their VIF values.
+    """
+    # Separate features (X) and target (y)
+    X = df.drop(target_variable, axis=1)
+    y = df[target_variable]
 
-# Applying RandomForestRegressor
-model = RandomForestRegressor(n_estimators=100, random_state=42)
-model.fit(X, y)
+    # Apply SelectKBest with mutual_info_regression
+    selector = SelectKBest(mutual_info_regression, k=k_best)
+    X_new = selector.fit_transform(X, y)
 
-# Displaying feature importance
-feature_importance = pd.DataFrame({'Feature': X.columns, 'Importance': model.feature_importances_})
-print(feature_importance.sort_values(by='Importance', ascending=False))
-# %%
-feature_importance.sort_values(by='Importance', ascending=False).head(10)
+    # Create DataFrame with selected features
+    selected_features = X.columns[selector.get_support()]
+    df_selected = pd.DataFrame(X_new, columns=selected_features)
 
+    # Get the scores of the selected features
+    selected_scores = selector.scores_[selector.get_support()]
+    df_selected_scores = pd.DataFrame({
+        'Feature': selected_features,
+        'Score': selected_scores
+    })
+
+    # Sort the selected features by score
+    df_selected_scores = df_selected_scores.sort_values(by='Score', ascending=False)
+
+    # Calculate VIF for the selected features
+    vif_data = pd.DataFrame()
+    vif_data["Feature"] = df_selected.columns
+    vif_data["VIF"] = [variance_inflation_factor(df_selected.values, i) for i in range(len(df_selected.columns))]
+
+    return df_selected_scores, vif_data
+
+#%%
+
+df_selected_scores, vif_data = feature_selection_vif(df_cleaned, target_variable='EUI', k_best=10)
+
+# Display the selected features and their VIF values
+print("Selected Features and Scores:")
+print(df_selected_scores)
+
+print("\nVIF for Selected Features:")
+print(vif_data)
+
+#%%
+#Remove repetitive columns
+df_cleaned = df_cleaned.drop("PBA", axis = 1)
+df_cleaned = df_cleaned.drop("WKHRSC", axis = 1)
+df_cleaned = df_cleaned.drop("NWKERC", axis = 1)
+df_cleaned = df_cleaned.drop("PCTRMC", axis = 1)
 
 
 #%%
-X = df_cleaned[['SQFT', 'NWKER', 'WKHRS', 'CDD65', 'PCTERMN', 'PBA', 'WLCNS', 'LTNHRP', 'OWNTYPE', 'PUBCLIM']]
-y = df_cleaned['ELCNS']
+
+df_selected_scores, vif_data = feature_selection_vif(df_cleaned, target_variable='EUI', k_best=10)
+
+# Display the selected features and their VIF values
+print("Selected Features and Scores:")
+print(df_selected_scores)
+
+print("\nVIF for Selected Features:")
+print(vif_data)
 
 
 #%%
-from sklearn.model_selection import train_test_split
-X_train,X_test,y_train,y_test = train_test_split(X, y,test_size = 0.2,random_state = 42)
-print(df.shape)
-print(X_train.shape)
-print(X_test.shape)
-print(y_train.shape)
-print(y_test.shape)
+#Remove high vif
+df_cleaned = df_cleaned.drop("LTOHRP", axis = 1)
+df_cleaned = df_cleaned.drop("RFGWI", axis = 1)
+
+#remove repetitive column
+df_cleaned = df_cleaned.drop("LNHRPC", axis = 1)
 
 #%%
-from sklearn.linear_model import LinearRegression
-lm = LinearRegression()
-lm.fit(X_train,y_train)
-lm.score(X_train,y_train)
+
+df_selected_scores, vif_data = feature_selection_vif(df_cleaned, target_variable='EUI', k_best=10)
+
+# Display the selected features and their VIF values
+print("Selected Features and Scores:")
+print(df_selected_scores)
+
+print("\nVIF for Selected Features:")
+print(vif_data)
 
 
 #%%
-y_pred = lm.predict(X_test)
+#Remove high vif
+df_cleaned = df_cleaned.drop("RFGICE", axis = 1)
+
 
 #%%
-from sklearn.metrics import r2_score,mean_squared_error,mean_absolute_error
-print("R2 Score")
-r2_score(y_pred,y_test)
+
+df_selected_scores, vif_data = feature_selection_vif(df_cleaned, target_variable='EUI', k_best=10)
+
+# Display the selected features and their VIF values
+print("Selected Features and Scores:")
+print(df_selected_scores)
+
+print("\nVIF for Selected Features:")
+print(vif_data)
 
 #%%
-import matplotlib.pyplot as plt
-import seaborn as sns
-residual = y_test - y_pred
-sns.histplot(residual)
+#Remove high vif
+df_cleaned = df_cleaned.drop("RFGCL", axis = 1)
+
 
 #%%
-plt.scatter(y_test,y_pred)
-plt.xlabel("Real Values")
-plt.ylabel("predicted values")
 
-# %%
-#Attempted Linear Model
-from statsmodels.formula.api import ols
-model = ols(formula='ELCNS ~ SQFT + NWKER + WKHRS + CDD65 + PCTERMN + C(PBA) + C(WLCNS)', data=df_cleaned)
-print( type(model) )
+df_selected_scores, vif_data = feature_selection_vif(df_cleaned, target_variable='EUI', k_best=10)
+
+# Display the selected features and their VIF values
+print("Selected Features and Scores:")
+print(df_selected_scores)
+
+print("\nVIF for Selected Features:")
+print(vif_data)
 
 #%%
-modelfit = model.fit()
-print( type(modelfit) )
-print( modelfit.summary() )
-
-# %%
-#Chi-squared test between pubclim and wlcns
-from scipy.stats import chi2_contingency
-# %%
-data_crosstab = pd.crosstab(df_cleaned['PUBCLIM'], df_cleaned['WLCNS'])
-print(data_crosstab)
-stat, p, dof, expected = chi2_contingency(data_crosstab)
-
-# interpret p-value
-alpha = 0.05
-print("p value is " + str(p))
-if p <= alpha:
-    print('Dependent (reject H0)')
-else:
-    print('Independent (H0 holds true)')
+#Remove high vif
+#df_cleaned = df_cleaned.drop("COOLP", axis = 1)
+df_cleaned = df_cleaned.drop("RGSTR", axis = 1)
 
 
-# %%
-import seaborn as sns
-import matplotlib.pyplot as plt
+#%%
 
-# Assuming your dataframe is named 'df' and has columns 'Climate_Zone' and 'Electricity_Consumption'
-plt.figure(figsize=(10, 6))
-sns.boxplot(x='PUBCLIM', y='ELCNS', data=df_cleaned)
-plt.title('Boxplot of Electricity Consumption by Climate Zone')
-plt.xlabel('Climate Zone')
-plt.ylabel('Electricity Consumption')
-plt.xticks(rotation=45)  # Rotate x-axis labels if needed
-plt.tight_layout()
-plt.show()
-# %%
-from statsmodels.formula.api import ols
-from statsmodels.stats.anova import anova_lm
+df_selected_scores, vif_data = feature_selection_vif(df_cleaned, target_variable='EUI', k_best=10)
 
-# Fit the ANOVA model
-model = ols('ELCNS ~ C(PUBCLIM)', data=df).fit()
+# Display the selected features and their VIF values
+print("Selected Features and Scores:")
+print(df_selected_scores)
 
-# Perform ANOVA
-anova_results = anova_lm(model)
-print(anova_results)
+print("\nVIF for Selected Features:")
+print(vif_data)
+
+
+#%%
+#Remove high vif
+df_cleaned = df_cleaned.drop("NOCCAT", axis = 1)
+
+
+#%%
+
+df_selected_scores, vif_data = feature_selection_vif(df_cleaned, target_variable='EUI', k_best=10)
+
+# Display the selected features and their VIF values
+print("Selected Features and Scores:")
+print(df_selected_scores)
+
+print("\nVIF for Selected Features:")
+print(vif_data)
+
