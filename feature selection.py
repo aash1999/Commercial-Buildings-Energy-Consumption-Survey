@@ -181,6 +181,7 @@ print(vif_data)
 
 
 
+
 # %%
 df_selected_scores
 # %%
@@ -214,7 +215,11 @@ plt.show()
 #%%
 # Create a new Data frame with the selected features and the dependent variables 'EUI'
 # List of features to keep
+<<<<<<< HEAD
 features_to_keep = ['EUI','PBA', 'WKHRS', 'LTNHRP', 'NWKER','PCTERMN','COOLP','MAINHT','MAINCL','FLCEILHT','NOCC']
+=======
+features_to_keep = ['EUI','PBAPLUS', 'WKHRS', 'LTNHRP', 'NWKER','PCTERMN','COOLP','MAINHT','MAINCL','FLCEILHT','NOCC']
+>>>>>>> fa4c6ecce7b1e56d0a48b24fc313f77498906f1d
 
 # Filter DataFrame by selecting only rows where 'Feature' is in the list
 df_cleaned = df_cleaned[features_to_keep]
@@ -224,7 +229,11 @@ print(df_cleaned.head())
 # %%
 # Rename the features
 df_cleaned = df_cleaned.rename(columns={'EUI': 'Energy_Use_Intensity'})
+<<<<<<< HEAD
 df_cleaned = df_cleaned.rename(columns={'PBA': 'Building_Activity'})
+=======
+df_cleaned = df_cleaned.rename(columns={'PBAPLUS': 'Building_Activity'})
+>>>>>>> fa4c6ecce7b1e56d0a48b24fc313f77498906f1d
 df_cleaned = df_cleaned.rename(columns={'WKHRS': 'Work_Hours'})
 df_cleaned = df_cleaned.rename(columns={'LTNHRP': 'Percent_Lit_Off_Hours'})
 df_cleaned = df_cleaned.rename(columns={'NWKER': 'Number_Workers'})
@@ -238,6 +247,7 @@ df_cleaned = df_cleaned.rename(columns={'NOCC': 'Number_business'})
 print(df_cleaned)
 
 #%%
+<<<<<<< HEAD
 df_cleaned.to_csv('cleaned_data3.csv', index=False)
 
 
@@ -302,5 +312,8 @@ plt.title('Distribution of Number of Workers')
 plt.xlabel('Number of Workers')
 plt.ylabel('Frequency')
 plt.show()
+=======
+df_cleaned.to_csv('cleaned_data2.csv', index=False)
+>>>>>>> fa4c6ecce7b1e56d0a48b24fc313f77498906f1d
 
 # %%
