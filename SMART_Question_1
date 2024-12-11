@@ -1,0 +1,73 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy import stats
+from statsmodels.formula.api import ols
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+
+# Load the data
+df = pd.read_csv('/content/cleaned_data3.csv')
+
+# Ensure necessary columns are present
+required_columns = ['Building_Activity', 'Energy_Use_Intensity', 'Work_Hours', 
+                    'Percent_Lit_Off_Hours', 'Number_Workers', 'Percent_Cooled']
+missing_columns = [col for col in required_columns if col not in df.columns]
+if missing_columns:
+    raise ValueError(f"Missing columns in the dataset: {missing_columns}")
+
+# Exploratory Data Analysis
+# Descriptive Statistics
+print("Descriptive Statistics:\n", df.describe())
+
+# Correlation Analysis
+correlation_matrix = df.corr()
+plt.figure(figsize=(12, 10))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
+plt.title('Correlation Matrix')
+plt.show()
+
+# Visualizations
+# Box plot of EUI by Building Activity
+plt.figure(figsize=(12, 6))
+sns.boxplot(x='Building_Activity', y='Energy_Use_Intensity', data=df)
+plt.title('Energy Use Intensity by Building Activity')
+plt.xticks(rotation=45)
+plt.xlabel('Building Activity')
+plt.ylabel('Energy Use Intensity')
+plt.show()
+
+# Scatter plot of EUI vs Work Hours
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='Work_Hours', y='Energy_Use_Intensity', data=df)
+plt.title('Energy Use Intensity vs Work Hours')
+plt.xlabel('Total Hours Open Per Week')
+plt.ylabel('Energy Use Intensity')
+plt.show()
+
+# Statistical Inference
+# ANOVA for Building Activity
+activity_groups = [group['Energy_Use_Intensity'].dropna() for _, group in df.groupby('Building_Activity')]
+if len(activity_groups) > 1:  # Ensure there are multiple groups for ANOVA
+    f_statistic, p_value = stats.f_oneway(*activity_groups)
+    print(f"ANOVA results for Building Activity: F-statistic = {f_statistic:.4f}, p-value = {p_value:.4e}")
+else:
+    print("Not enough groups for ANOVA analysis.")
+
+# Multiple Linear Regression
+model_formula = 'Energy_Use_Intensity ~ Work_Hours + Percent_Lit_Off_Hours + Number_Workers + Percent_Cooled'
+model = ols(model_formula, data=df).fit()
+print(model.summary())
+
+# Pairwise Comparisons (Tukey's HSD)
+# Ensure Building_Activity is categorical and contains sufficient groups
+if len(df['Building_Activity'].unique()) > 1:
+    tukey_results = pairwise_tukeyhsd(df['Energy_Use_Intensity'], df['Building_Activity'])
+    print(tukey_results)
+else:
+    print("Not enough unique groups in 'Building_Activity' for Tukey's HSD.")
+
+# Visualization of Regression Results
+pairplot_cols = ['Energy_Use_Intensity', 'Work_Hours', 'Percent_Lit_Off_Hours', 'Number_Workers', 'Percent_Cooled']
+sns.pairplot(df[pairplot_cols])
+plt.show() 
