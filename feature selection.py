@@ -109,7 +109,7 @@ print(vif_data)
 
 #%%
 #Remove repetitive columns
-df_cleaned = df_cleaned.drop("PBA", axis = 1)
+df_cleaned = df_cleaned.drop("PBAPLUS", axis = 1)
 df_cleaned = df_cleaned.drop("WKHRSC", axis = 1)
 df_cleaned = df_cleaned.drop("NWKERC", axis = 1)
 df_cleaned = df_cleaned.drop("PCTRMC", axis = 1)
@@ -179,62 +179,47 @@ print(df_selected_scores)
 print("\nVIF for Selected Features:")
 print(vif_data)
 
-#%%
-#Remove high vif
-#df_cleaned = df_cleaned.drop("COOLP", axis = 1)
-df_cleaned = df_cleaned.drop("RGSTR", axis = 1)
 
 
-#%%
 
-df_selected_scores, vif_data = feature_selection_vif(df_cleaned, target_variable='EUI', k_best=10)
+# %%
+df_selected_scores
+# %%
+import matplotlib.pyplot as plt
 
-# Display the selected features and their VIF values
-print("Selected Features and Scores:")
-print(df_selected_scores)
+# Select the top 10 features
+top_features = df_selected_scores.head(10)
 
-print("\nVIF for Selected Features:")
-print(vif_data)
-
-
-#%%
-#Remove high vif
-df_cleaned = df_cleaned.drop("NOCCAT", axis = 1)
-
-
-#%%
-
-df_selected_scores, vif_data = feature_selection_vif(df_cleaned, target_variable='EUI', k_best=10)
-
-# Display the selected features and their VIF values
-print("Selected Features and Scores:")
-print(df_selected_scores)
-
-print("\nVIF for Selected Features:")
-print(vif_data)
+# Plot a horizontal bar chart
+plt.figure(figsize=(8, 6))
+plt.barh(top_features['Feature'], top_features['Score'], color='darkkhaki')
+plt.xlabel("Importance Score")
+plt.ylabel("Features")
+plt.title("Top 10 Important Features")
+plt.gca().invert_yaxis()  # Invert y-axis to show highest score at the top
+plt.tight_layout()
+plt.show()
+# %%
 
 
-#%%
-#Remove high vif
-df_cleaned = df_cleaned.drop("MONUSE", axis = 1)
-
-
-#%%
-
-df_selected_scores, vif_data = feature_selection_vif(df_cleaned, target_variable='EUI', k_best=10)
-
-# Display the selected features and their VIF values
-print("Selected Features and Scores:")
-print(df_selected_scores)
-
-print("\nVIF for Selected Features:")
-print(vif_data)
-
+# Plot the histogram for EUI
+plt.figure(figsize=(8, 6))
+plt.hist(df_cleaned['EUI'], bins=30, color='darkkhaki', edgecolor='black')
+plt.xlabel("EUI (Energy Use Intensity)")
+plt.ylabel("Frequency")
+plt.title("Distribution of EUI")
+plt.grid(axis='y', alpha=0.75)  # Add gridlines for better readability
+plt.tight_layout()
+plt.show()
 
 #%%
 # Create a new Data frame with the selected features and the dependent variables 'EUI'
 # List of features to keep
+<<<<<<< HEAD
+features_to_keep = ['EUI','PBA', 'WKHRS', 'LTNHRP', 'NWKER','PCTERMN','COOLP','MAINHT','MAINCL','FLCEILHT','NOCC']
+=======
 features_to_keep = ['EUI','PBAPLUS', 'WKHRS', 'LTNHRP', 'NWKER','PCTERMN','COOLP','MAINHT','MAINCL','FLCEILHT','NOCC']
+>>>>>>> fa4c6ecce7b1e56d0a48b24fc313f77498906f1d
 
 # Filter DataFrame by selecting only rows where 'Feature' is in the list
 df_cleaned = df_cleaned[features_to_keep]
@@ -244,7 +229,11 @@ print(df_cleaned.head())
 # %%
 # Rename the features
 df_cleaned = df_cleaned.rename(columns={'EUI': 'Energy_Use_Intensity'})
+<<<<<<< HEAD
+df_cleaned = df_cleaned.rename(columns={'PBA': 'Building_Activity'})
+=======
 df_cleaned = df_cleaned.rename(columns={'PBAPLUS': 'Building_Activity'})
+>>>>>>> fa4c6ecce7b1e56d0a48b24fc313f77498906f1d
 df_cleaned = df_cleaned.rename(columns={'WKHRS': 'Work_Hours'})
 df_cleaned = df_cleaned.rename(columns={'LTNHRP': 'Percent_Lit_Off_Hours'})
 df_cleaned = df_cleaned.rename(columns={'NWKER': 'Number_Workers'})
@@ -258,6 +247,73 @@ df_cleaned = df_cleaned.rename(columns={'NOCC': 'Number_business'})
 print(df_cleaned)
 
 #%%
+<<<<<<< HEAD
+df_cleaned.to_csv('cleaned_data3.csv', index=False)
+
+
+# %%
+import seaborn as sns
+
+codebook_df = pd.read_csv("PBA Codebook.csv")
+
+# Merge the main dataset with the codebook on the encoded activity column
+merged_df = df_cleaned.merge(codebook_df, left_on='Building_Activity', right_on='PBA ID', how='left')
+
+# Now, use the decoded 'Activity_Name' column for plotting
+top_10_activities = merged_df['Name'].value_counts().head(10)
+
+# Plotting the distribution of the top 10 building activities by frequency as horizontal bars
+plt.figure(figsize=(10, 6))
+sns.barplot(y=top_10_activities.index, x=top_10_activities.values, color='darkkhaki', orient='h', edgecolor='black')
+
+# Adding labels and title
+plt.title('Top 10 Building Activities by Frequency')
+plt.ylabel('Building Activity')
+plt.xlabel('Number of Buildings')
+
+# Display the plot
+plt.show()
+
+
+
+
+# %%
+# Count the occurrences of each Main Cooling Equipment
+top_cool_equipment = df_cleaned['Main_Cool_Equp'].value_counts().head(5)
+
+codebook_df2 = pd.read_csv("MAINCL Codebook.csv")
+
+merged_df2 = df_cleaned.merge(codebook_df2[['Code', 'Name']], left_on='Main_Cool_Equp', right_on='Code', how='left')
+
+# Now, use the decoded 'Activity_Name' column for plotting
+top_cool_equipment = merged_df2['Name'].value_counts().head(5)
+
+# Plotting horizontal bar chart for top 10 Main Cooling Equipment
+plt.figure(figsize=(10, 6))
+top_cool_equipment.plot(kind='barh', color='paleturquoise', edgecolor='black')
+plt.title('Top 5 Main Cooling Equipment')
+plt.xlabel('Frequency')
+plt.ylabel('Main Cooling Equipment')
+plt.gca().invert_yaxis()  # To display the most frequent at the top
+plt.show()
+# %%
+# Plotting histogram for Work_Hours
+plt.figure(figsize=(8, 6))
+plt.hist(df_cleaned['Work_Hours'], bins=20, color='paleturquoise', edgecolor='black')
+plt.title('Distribution of Total hours open per week')
+plt.xlabel('Total hours open per week')
+plt.ylabel('Frequency')
+plt.show()
+
+# Plotting histogram for Number_Workers
+plt.figure(figsize=(8, 6))
+plt.hist(df_cleaned['Number_Workers'], bins=20, color='darkkhaki', edgecolor='black')
+plt.title('Distribution of Number of Workers')
+plt.xlabel('Number of Workers')
+plt.ylabel('Frequency')
+plt.show()
+=======
 df_cleaned.to_csv('cleaned_data2.csv', index=False)
+>>>>>>> fa4c6ecce7b1e56d0a48b24fc313f77498906f1d
 
 # %%
